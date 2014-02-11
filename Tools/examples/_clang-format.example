@@ -1,0 +1,4 @@
+BasedOnStyle:  LLVM
+BreakBeforeBraces: Stroustrup
+ColumnLimit:     120
+MaxEmptyLinesToKeep: 2
