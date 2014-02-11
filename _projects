@@ -1,0 +1,17 @@
+[Base]
+project=Libraries/Base/ATBase.xcodeproj
+src=Libraries/Base/ATBase
+format=yes
+sort=yes
+
+[Animation]
+project=Libraries/Animation/ATAnimationKit.xcodeproj
+src=Libraries/Animation/ATAnimationKit
+format=yes
+sort=yes
+
+[AnimationExample]
+project=Applications/AnimationExample/ATAnimationKitExample.xcodeproj
+src=Applications/AnimationExample/ATAnimationKitExample
+format=yes
+sort=yes
