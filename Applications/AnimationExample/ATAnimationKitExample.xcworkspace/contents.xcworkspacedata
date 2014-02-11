@@ -2,10 +2,10 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:../ATBase/ATBase.xcodeproj">
+      location = "group:../../Libraries/Base/ATBase.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:../ATAnimationKit/ATAnimationKit.xcodeproj">
+      location = "group:../../Libraries/Animation/ATAnimationKit.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:ATAnimationKitExample.xcodeproj">
