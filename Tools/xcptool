@@ -11,22 +11,27 @@ objc.loadBundleFunctions(IDEFoundation, globals(), [('IDEInitialize', objc._C_VO
 
 IDEInitialize(1, None)
 
-url = NSURL.fileURLWithPath_(u'/Users/toulouse/code/ATToolkit/Tools/ATBase.xcodeproj/project.pbxproj')
-print "Opening Xcode project"
-projectPList = NSPropertyListSerialization.dvt_propertyListWithURL_options_format_error_(url, 0, objc.nil, objc.nil)
-print "Serializing to XML PList"
-xmlData, error = NSPropertyListSerialization.dataWithPropertyList_format_options_error_(projectPList, 100, 0, objc.nil)
-print "Writing to file"
-xmlData.writeToFile_atomically_(u'/Users/toulouse/code/ATToolkit/Tools/project.plist', True)
-print "Opening Project plist"
-xmlPListURL = NSURL.fileURLWithPath_(u'/Users/toulouse/code/ATToolkit/Tools/project.plist')
-xmlPListData = NSData.dataWithContentsOfURL_(xmlPListURL)
-xmlPList, error = NSPropertyListSerialization.propertyListWithData_options_format_error_(xmlPListData, 0, objc.nil, objc.nil)
-print "Serializing to Xcode project format"
-serializer = XCSimplePlainTextSerializer.alloc().init()
-xmlPList.dvt_writeToSerializer_(serializer)
+project = PBXProject.alloc().init()
+project.setForceWriteToFileSystem_(True)
+project.setLastUpgradeCheck_(u'0500')
+project.setPath_(u'/Users/toulouse/code/ATToolkit/Tools/Test.xcodeproj')
+project.setClassPrefix_(u'AT')
+project.setOrganizationName_(u'Andrew Toulouse')
+project.createDefaultProjectSettingsConfigurationsIfNeeded()
 
-#project = PBXProject.projectWithFile_(u'/Users/toulouse/code/ATToolkit/Tools/ATBase.xcodeproj')
+target = PBXNativeTarget.alloc().initWithName_productTypeIdentifier_(u'NativeTarget', u'com.apple.product-type.application')
+project.addTarget_(target)
+
+for buildConfiguration in project.buildConfigurationList().buildConfigurations():
+	pass
+#target = PBXTarget.alloc().initWithName_productTypeIdentifier_templateDictionary_baseDirectoryPath_(u'TargetName', u'se.atoulou.synthesized', )
+
+
+written = project.writeToFileSystemProjectFile_userFile_checkNeedsRevert_(True, False, False)
+print "written? ", written
+
+
+example_project = PBXProject.projectWithFile_(u'/Users/toulouse/code/ATToolkit/Tools/NewProject.xcodeproj')
 
 
 #unarchiver = PBXPListUnarchiver.alloc().initWithPListArchive_(u'/Users/toulouse/code/ATToolkit/Tools/ATBase.xcodeproj')
