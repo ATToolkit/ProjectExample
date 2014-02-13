@@ -1,0 +1,37 @@
+#!/usr/bin/env python -i
+
+import objc
+
+DVTFoundation = objc.loadBundle('DVTFoundation', globals(), "/Applications/Xcode.app/Contents/SharedFrameworks/DVTFoundation.framework")
+CSServiceClient = objc.loadBundle("CSServiceClient", globals(), "/Applications/Xcode.app/Contents/SharedFrameworks/CSServiceClient.framework")
+IDEFoundation = objc.loadBundle("IDEFoundation", globals(), "/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework")
+Xcode3Core = objc.loadBundle('Xcode3Core', globals(), "/Applications/Xcode.app/Contents/PlugIns/Xcode3Core.ideplugin")
+
+objc.loadBundleFunctions(IDEFoundation, globals(), [('IDEInitialize', objc._C_VOID + objc._C_NSUInteger + objc._C_PTR + objc._C_ID)], False)
+
+IDEInitialize(1, None)
+
+url = NSURL.fileURLWithPath_(u'/Users/toulouse/code/ATToolkit/Tools/ATBase.xcodeproj/project.pbxproj')
+print "Opening Xcode project"
+projectPList = NSPropertyListSerialization.dvt_propertyListWithURL_options_format_error_(url, 0, objc.nil, objc.nil)
+print "Serializing to XML PList"
+xmlData, error = NSPropertyListSerialization.dataWithPropertyList_format_options_error_(projectPList, 100, 0, objc.nil)
+print "Writing to file"
+xmlData.writeToFile_atomically_(u'/Users/toulouse/code/ATToolkit/Tools/project.plist', True)
+print "Opening Project plist"
+xmlPListURL = NSURL.fileURLWithPath_(u'/Users/toulouse/code/ATToolkit/Tools/project.plist')
+xmlPListData = NSData.dataWithContentsOfURL_(xmlPListURL)
+xmlPList, error = NSPropertyListSerialization.propertyListWithData_options_format_error_(xmlPListData, 0, objc.nil, objc.nil)
+print "Serializing to Xcode project format"
+serializer = XCSimplePlainTextSerializer.alloc().init()
+xmlPList.dvt_writeToSerializer_(serializer)
+
+#project = PBXProject.projectWithFile_(u'/Users/toulouse/code/ATToolkit/Tools/ATBase.xcodeproj')
+
+
+#unarchiver = PBXPListUnarchiver.alloc().initWithPListArchive_(u'/Users/toulouse/code/ATToolkit/Tools/ATBase.xcodeproj')
+
+
+
+#targets = project.targets()
+#target = targets[0]
