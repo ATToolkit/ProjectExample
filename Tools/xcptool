@@ -11,7 +11,11 @@ objc.loadBundleFunctions(IDEFoundation, globals(), [('IDEInitialize', objc._C_VO
 
 IDEInitialize(1, None)
 
+
+PROJECT_NAME = u'ProjectName'
+
 project = PBXProject.alloc().init()
+project.setPreferredProjectFormat_(PBXProject._nativeFormat())
 project.setForceWriteToFileSystem_(True)
 project.setLastUpgradeCheck_(u'0500')
 project.setPath_(u'/Users/toulouse/code/ATToolkit/Tools/Test.xcodeproj')
@@ -19,24 +23,36 @@ project.setClassPrefix_(u'AT')
 project.setOrganizationName_(u'Andrew Toulouse')
 project.createDefaultProjectSettingsConfigurationsIfNeeded()
 
-target = PBXNativeTarget.alloc().initWithName_productTypeIdentifier_(u'NativeTarget', u'com.apple.product-type.application')
+mainGroup = PBXGroup.groupWithName_path_(PROJECT_NAME, PROJECT_NAME)
+frameworks = PBXGroup.groupWithName_(u'Frameworks')
+project.rootGroup().addItems_([mainGroup, frameworks])
+
+target = PBXNativeTarget.alloc().initWithName_productTypeIdentifier_(PROJECT_NAME, u'com.apple.product-type.application')
 project.addTarget_(target)
 
-for buildConfiguration in project.buildConfigurationList().buildConfigurations():
-	pass
-#target = PBXTarget.alloc().initWithName_productTypeIdentifier_templateDictionary_baseDirectoryPath_(u'TargetName', u'se.atoulou.synthesized', )
+sourcesPhase = PBXSourcesBuildPhase.alloc().init()
+mainGroup.addFiles_copy_createGroupsRecursively_([u'/Users/toulouse/code/ATToolkit/Tools/Test/main.m'], False, True)
+#target.addReference_(mainFileRef)
+#print target.appropriateBuildPhaseForFileReference_(mainFileRef)
+#print "add ref: ", sourcesPhase.addReference_(mainFileRef)
+#print "asdf"
+#mainFile = sourcesPhase.buildFileForReference_(mainFileRef)
+#
+#if mainFile is None:
+#	import pdb
+#	pdb.set_trace()
+#
+#sourcesPhase.addBuildFile_(mainFile)
+target.addBuildPhase_(sourcesPhase)
 
+frameworksPhase = PBXFrameworksBuildPhase.alloc().init()
+target.addBuildPhase_(frameworksPhase)
+
+buildPhase = PBXResourcesBuildPhase.alloc().init()
+target.addBuildPhase_(buildPhase)
 
 written = project.writeToFileSystemProjectFile_userFile_checkNeedsRevert_(True, False, False)
 print "written? ", written
 
 
-example_project = PBXProject.projectWithFile_(u'/Users/toulouse/code/ATToolkit/Tools/NewProject.xcodeproj')
-
-
-#unarchiver = PBXPListUnarchiver.alloc().initWithPListArchive_(u'/Users/toulouse/code/ATToolkit/Tools/ATBase.xcodeproj')
-
-
-
-#targets = project.targets()
-#target = targets[0]
+ex = PBXProject.projectWithFile_(u'/Users/toulouse/code/ATToolkit/Tools/NewProject.xcodeproj')
