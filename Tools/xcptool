@@ -1,6 +1,7 @@
 #!/usr/bin/env python -i
 
 import objc
+import os
 
 DVTFoundation = objc.loadBundle('DVTFoundation', globals(), "/Applications/Xcode.app/Contents/SharedFrameworks/DVTFoundation.framework")
 CSServiceClient = objc.loadBundle("CSServiceClient", globals(), "/Applications/Xcode.app/Contents/SharedFrameworks/CSServiceClient.framework")
@@ -11,45 +12,66 @@ objc.loadBundleFunctions(IDEFoundation, globals(), [('IDEInitialize', objc._C_VO
 
 IDEInitialize(1, None)
 
-
+BASE_DIR = u'/Users/toulouse/code/ATToolkit/Tools/tmp'
 PROJECT_NAME = u'ProjectName'
 
 project = PBXProject.alloc().init()
 project.setPreferredProjectFormat_(PBXProject._nativeFormat())
 project.setForceWriteToFileSystem_(True)
 project.setLastUpgradeCheck_(u'0500')
-project.setPath_(u'/Users/toulouse/code/ATToolkit/Tools/Test.xcodeproj')
+project.setPath_(u'{}/{}.xcodeproj'.format(BASE_DIR, PROJECT_NAME))
 project.setClassPrefix_(u'AT')
 project.setOrganizationName_(u'Andrew Toulouse')
 project.createDefaultProjectSettingsConfigurationsIfNeeded()
 
+# PROJECT: Add groups
 mainGroup = PBXGroup.groupWithName_path_(PROJECT_NAME, PROJECT_NAME)
+supportingFilesGroup = PBXGroup.groupWithName_(u'Supporting Files')
+mainGroup.addItem_(supportingFilesGroup)
+
 frameworks = PBXGroup.groupWithName_(u'Frameworks')
 project.rootGroup().addItems_([mainGroup, frameworks])
 
+# PROJECT: Add target
 target = PBXNativeTarget.alloc().initWithName_productTypeIdentifier_(PROJECT_NAME, u'com.apple.product-type.application')
 project.addTarget_(target)
 
+# TARGET: Add phases
 sourcesPhase = PBXSourcesBuildPhase.alloc().init()
-mainGroup.addFiles_copy_createGroupsRecursively_([u'/Users/toulouse/code/ATToolkit/Tools/Test/main.m'], False, True)
-#target.addReference_(mainFileRef)
-#print target.appropriateBuildPhaseForFileReference_(mainFileRef)
-#print "add ref: ", sourcesPhase.addReference_(mainFileRef)
-#print "asdf"
-#mainFile = sourcesPhase.buildFileForReference_(mainFileRef)
-#
-#if mainFile is None:
-#	import pdb
-#	pdb.set_trace()
-#
-#sourcesPhase.addBuildFile_(mainFile)
 target.addBuildPhase_(sourcesPhase)
 
 frameworksPhase = PBXFrameworksBuildPhase.alloc().init()
 target.addBuildPhase_(frameworksPhase)
 
-buildPhase = PBXResourcesBuildPhase.alloc().init()
-target.addBuildPhase_(buildPhase)
+resourcesPhase = PBXResourcesBuildPhase.alloc().init()
+target.addBuildPhase_(resourcesPhase)
+
+# TARGET: Add SDKs
+platform = target.platform()
+defaultSDK = platform.defaultSDK() # Just using the default for now
+libraries = defaultSDK.libraries()
+for library in libraries:
+	#DEBUG: print "{}: {} ({})".format(library.sourceTree(), library.displayName(), library.path())
+	if library.displayName() != u'Cocoa.framework':
+		continue
+
+	frameworkPath =  os.path.relpath(library.path(), defaultSDK.path())
+	frameworkRef = PBXFileReference.alloc().initWithName_path_sourceTree_(library.displayName(), frameworkPath, library.sourceTree())
+	frameworks.addItem_(frameworkRef)
+	frameworksPhase.addBuildFile_(PBXBuildFile.buildFileWithReference_(frameworkRef))
+
+# PHASES: Add files
+supportingFiles = (
+	u'main.m',
+	u'InfoPlist.strings',
+	u'{}-Info.plist'.format(PROJECT_NAME),
+	u'{}-Prefix.pch'.format(PROJECT_NAME),
+)
+
+supportingFileRefs = supportingFilesGroup.addFiles_copy_createGroupsRecursively_(supportingFiles, False, True)
+
+resourcesPhase.addBuildFile_(PBXBuildFile.buildFileWithReference_(supportingFileRefs[1]))
+sourcesPhase.addBuildFile_(PBXBuildFile.buildFileWithReference_(supportingFileRefs[0]))
 
 written = project.writeToFileSystemProjectFile_userFile_checkNeedsRevert_(True, False, False)
 print "written? ", written
